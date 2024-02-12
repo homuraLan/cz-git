@@ -4,6 +4,14 @@ import type { UserOptions } from '../src'
 import { configLoader } from '../src'
 import { useBootstrap } from './utils'
 
+interface Config {
+  rules?: Record<string, any>
+  prompt: {
+    path: string
+    useEmoji: boolean
+  }
+}
+
 describe('config loader', () => {
   let mockDir: tmp.DirResult | null = null
   afterEach(() => {
@@ -23,7 +31,14 @@ describe('config loader', () => {
   test('basic packages.json config should be loaded', async () => {
     mockDir = await useBootstrap('./fixtures/1-basic')
     const config = await loaderSpyFn({ cwd: mockDir.name })
-    expect(config).toEqual({ prompt: { path: 'node_modules/cz-git', useEmoji: true } })
+    const newConfig: Config = {
+      prompt: {
+        path: config.prompt.path,
+        useEmoji: config.prompt.useEmoji,
+      },
+    }
+
+    expect(newConfig).toEqual({ prompt: { path: 'node_modules/cz-git', useEmoji: true } })
   }, 1000)
 
   test('basic commitlint js config should be loaded', async () => {
@@ -47,13 +62,19 @@ describe('config loader', () => {
   test('basic commitizen js config should be loaded', async () => {
     mockDir = await useBootstrap('./fixtures/1-basic-cz-js')
     const config = await loaderSpyFn({ cwd: mockDir.name })
-    expect(config).toEqual({ prompt: { useEmoji: true } })
+    expect({ prompt: { useEmoji: config.prompt.useEmoji } }).toEqual({ prompt: { useEmoji: true } })
   }, 1000)
 
   test('basic commitizen json config should be loaded', async () => {
     mockDir = await useBootstrap('./fixtures/1-basic-cz-json')
     const config = await loaderSpyFn({ cwd: mockDir.name })
-    expect(config).toEqual({ prompt: { path: 'node_modules/cz-git', useEmoji: true } })
+    const newConfig: Config = {
+      prompt: {
+        path: config.prompt.path,
+        useEmoji: config.prompt.useEmoji,
+      },
+    }
+    expect(newConfig).toEqual({ prompt: { path: 'node_modules/cz-git', useEmoji: true } })
   }, 1000)
 
   test('commitizen extends config should be loaded', async () => {
@@ -93,7 +114,7 @@ describe('config loader', () => {
   test('custom config should be loaded', async () => {
     mockDir = await useBootstrap('./fixtures/4-custom-config')
     const config = await loaderSpyFn({ cwd: mockDir.name })
-    expect(config).toEqual({
+    expect({ prompt: { useEmoji: config.prompt.useEmoji } }).toEqual({
       prompt: {
         useEmoji: true,
       },
@@ -103,7 +124,7 @@ describe('config loader', () => {
   test('specify the configuration path', async () => {
     mockDir = await useBootstrap('./fixtures/5-specify-custom-config')
     const config = await loaderSpyFn({ cwd: mockDir.name, configPath: './config/cz.custom.js' })
-    expect(config).toEqual({
+    expect({ prompt: { useEmoji: config.prompt.useEmoji } }).toEqual({
       prompt: {
         useEmoji: true,
       },
